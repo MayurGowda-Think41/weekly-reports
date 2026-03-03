@@ -43,12 +43,13 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', fabricApiUrl: FABRIC_API_URL });
 });
 
-// Mount routes
+// Mount API routes
 app.use('/api/timesheets', timesheetRoutes);
 
-// Serve frontend for all other routes in production
+// Serve frontend for all other routes in production (catch-all)
 if (isProduction) {
-  app.get('/:path(.*)', (req: Request, res: Response) => {
+  // Express 5 compatible catch-all route
+  app.get('/*', (req: Request, res: Response) => {
     res.sendFile(resolve(__dirname, '../../dist/index.html'));
   });
 }
