@@ -20,7 +20,14 @@ const isProduction = process.env.NODE_ENV === 'production';
 // Middleware
 if (!isProduction) {
   app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow any localhost origin in development
+      if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true
   }));
 }
@@ -48,8 +55,8 @@ app.use('/api/timesheets', timesheetRoutes);
 
 // Serve frontend for all other routes in production (catch-all)
 if (isProduction) {
-  // Express 5 compatible catch-all route
-  app.get('/*', (req: Request, res: Response) => {
+  // Express 5 compatible catch-all using middleware
+  app.use((req: Request, res: Response) => {
     res.sendFile(resolve(__dirname, '../../dist/index.html'));
   });
 }
